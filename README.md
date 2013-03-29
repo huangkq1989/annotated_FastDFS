@@ -2,3 +2,11 @@ annotated_FastDFS
 =================
 
 annotate  fastdfs_v1.29 in Chinese
+FastDFS is a distribute file system writen by yuqing, 
+you can find the orginal source code here:
+https://code.google.com/p/fastdfs/ 
+
+Inorder to make it clear how it works, I annotate it
+in Chinese, you can contact me by huangkq1989@gmail.com
+and my blog is: 
+http://blog.csdn.net/kangquan2008
