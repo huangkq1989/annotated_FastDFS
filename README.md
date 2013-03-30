@@ -10,3 +10,5 @@ Inorder to make it clear how it works, I annotate it
 in Chinese, you can contact me by huangkq1989@gmail.com
 and my blog is: 
 http://blog.csdn.net/kangquan2008
+
+I am looking for an intership, will be appreciated to your offer:)
