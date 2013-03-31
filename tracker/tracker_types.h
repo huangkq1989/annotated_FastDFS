@@ -206,6 +206,7 @@ typedef struct StructFDFSStorageDetail
     int64_t total_mb;  //total disk storage in MB
     int64_t free_mb;  //free disk storage in MB
     /*changelog是记录storage的变更的，主要是记录ip变化和storage删除*/
+    /*storage记录自己的偏移量，以后从偏移量后开始把数据取回去*/
     int64_t changelog_offset;  //changelog file offset
 
     int64_t *path_total_mbs; //total disk storage in MB
@@ -235,7 +236,7 @@ typedef struct StructFDFSStorageDetail
 /*storage group 的信息*/
 typedef struct
 {
-    bool dirty; //for what
+    bool dirty; /*在从新分配时，如果旧的还有被引用，就标记为脏: 查找 dirty = */
     char group_name[FDFS_GROUP_NAME_MAX_LEN + 1];
     int64_t free_mb;  //free disk storage in MB 所有的storage组合起来的空闲
     int alloc_size;   //为group中的storage预分配空间
@@ -301,7 +302,7 @@ typedef struct
     char store_group[FDFS_GROUP_NAME_MAX_LEN + 1];  /*这是当前操作组的名称*/
 } FDFSGroups;
 
-/*tracker 作为服务器端时，它处理请求时需要的信息*/
+/*tracker 作为服务器端时，客户端（storage/client）需要维护的信息*/
 typedef struct
 {
     int sock;    /*请求用的是哪个socket fd*/
@@ -310,7 +311,7 @@ typedef struct
     char group_name[FDFS_GROUP_NAME_MAX_LEN + 1]; /*请求的storage所属的组名*/
 } TrackerServerInfo;
 
-/*tracker作为客户端时需要的信息*/
+/*tracker在处理连接时tracker需要维护的信息*/
 typedef struct
 {
     int sock;

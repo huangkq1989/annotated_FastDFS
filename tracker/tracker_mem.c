@@ -1533,6 +1533,7 @@ static int tracker_mem_init_group(FDFSGroupInfo *pGroup)
     pEnd = pGroup->all_servers + pGroup->alloc_size;
     for (pServer=pGroup->all_servers; pServer<pEnd; pServer++)
     {
+        /*同组的storage指向同一个ref_count*/
         pServer->ref_count = ref_count;
     }
 
@@ -1644,6 +1645,7 @@ static int tracker_mem_realloc_groups(const bool bNeedSleep)
     int *new_ref_count;
 
     /*每次会分配两个*/
+    /*FDFSGroups的groups是数组来的，只能重新分配，然后把旧的赋到新的*/
     new_size = g_groups.alloc_size + TRACKER_MEM_ALLOC_ONCE;
     new_groups = (FDFSGroupInfo *)malloc(sizeof(FDFSGroupInfo) * new_size);
     if (new_groups == NULL)
@@ -1774,7 +1776,10 @@ int tracker_get_group_success_upload_count(FDFSGroupInfo *pGroup)
     return count;
 }
 
-/*获取目标机器的详细信息*/
+/*
+ * 新增一台机器时，是需要由一台已有的机器把所有的数据发过去的
+ * 这里就是找这台已有的机器
+ */
 FDFSStorageDetail *tracker_get_group_sync_src_server(FDFSGroupInfo *pGroup, \
         FDFSStorageDetail *pDestServer)
 {
@@ -1784,11 +1789,13 @@ FDFSStorageDetail *tracker_get_group_sync_src_server(FDFSGroupInfo *pGroup, \
     ppServerEnd = pGroup->active_servers + pGroup->active_count;
     for (ppServer=pGroup->active_servers; ppServer<ppServerEnd; ppServer++)
     {
+        /*如果是自己，不可以*/
         if (strcmp((*ppServer)->ip_addr, pDestServer->ip_addr) == 0)
         {
             continue;
         }
 
+        /*不是自己，就可以了*/
         return *ppServer;
     }
 
@@ -2066,6 +2073,7 @@ static int tracker_mem_realloc_store_servers(FDFSGroupInfo *pGroup, \
         pServerEnd = old_servers + pGroup->count;
         for (pServer=old_servers; pServer<pServerEnd; pServer++)
         {
+            /*标志为脏*/
             pServer->dirty = true;
         }
     }
@@ -2933,6 +2941,7 @@ int tracker_mem_add_group_and_storage(TrackerClientInfo *pClientInfo, \
     return 0;
 }
 
+/*根据briefServers修改storage的状态等信息*/
 int tracker_mem_sync_storages(FDFSGroupInfo *pGroup, \
         FDFSStorageBrief *briefServers, const int server_count)
 {
@@ -2968,6 +2977,7 @@ int tracker_mem_sync_storages(FDFSGroupInfo *pGroup, \
 
         memset(&target_storage, 0, sizeof(target_storage));
         pStorageServer = pGroup->all_servers + pGroup->count;
+        /*根据传进来的FDFSStorageBrief参数进行修改*/
         pEnd = briefServers + server_count;
         for (pServer=briefServers; pServer<pEnd; pServer++)
         {
@@ -3014,11 +3024,13 @@ int tracker_mem_sync_storages(FDFSGroupInfo *pGroup, \
                     pGroup->chg_count++;
                 }
             }
+            /*找不到，且状态*/
             else if (pServer->status == FDFS_STORAGE_STATUS_DELETED
                     || pServer->status == FDFS_STORAGE_STATUS_IP_CHANGED)
             {
                 //ignore deleted storage server
             }
+            /*找不到，加入*/
             else
             {
                 pStorageServer->status = pServer->status;
@@ -3140,6 +3152,7 @@ int tracker_mem_deactive_store_server(FDFSGroupInfo *pGroup,
     return 0;
 }
 
+/*修改storage的状态，且把其加入active列表*/
 int tracker_mem_active_store_server(FDFSGroupInfo *pGroup, \
         FDFSStorageDetail *pTargetServer) 
 {

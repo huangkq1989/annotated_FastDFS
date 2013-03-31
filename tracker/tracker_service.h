@@ -2,8 +2,7 @@
  * 中文注释by: huangkq1989
  * email: huangkq1989@gmail.com
  *
- * 本文件处理加载配置文件，加载后把参数赋给Tracker的
- * 全局变量
+ * 监听后处理来自client和storage的请求
  *
  **************************************************/
 
@@ -15,17 +14,21 @@
  * Please visit the FastDFS Home Page http://www.csource.org/ for more detail.
  **/
 
-//tracker_func.h
+//tracker_service.h
 
-#ifndef _TRACKER_FUNC_H_
-#define _TRACKER_FUNC_H_
+#ifndef _TRACKER_SERVICE_H_
+#define _TRACKER_SERVICE_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    int tracker_load_from_conf_file(const char *filename, \
-            char *bind_addr, const int addr_size);
+    extern int g_tracker_thread_count;
+
+    int tracker_service_init();
+    int tracker_service_destroy();
+
+    void* tracker_thread_entrance(void* arg);
 
 #ifdef __cplusplus
 }
