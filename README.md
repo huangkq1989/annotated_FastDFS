@@ -12,3 +12,9 @@ and my blog is:
 http://blog.csdn.net/kangquan2008
 
 I am looking for an intership, will be appreciated to your offer:)
+
+PS:
+php_client is a php extention of fastdfs, it's the php function wrapper of 
+fastdfs client. And the source files in test directory are some test codes.
+I am not going to annotate these source files in these two directorys.
+
